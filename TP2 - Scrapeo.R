@@ -7,4 +7,6 @@
 library(rvest)
 library(tidyverse)
 
-read_html("https://es.wikipedia.org/wiki/Vacunaci%C3%B3n_contra_la_COVID-19_en_Argentina")
+wikipedia_url <- "https://es.wikipedia.org/wiki/Vacunaci%C3%B3n_contra_la_COVID-19_en_Argentina"
+
+vacunascovid_arg <- read_html(wikipedia_url)
