@@ -6,7 +6,10 @@
 #install.packages("rvest")
 library(rvest) # Easily Harvest (Scrape) Web Pages
 library(tidyverse) # Easily Install and Load the 'Tidyverse' 
+library(janitor) # Simple Tools for Examining and Cleaning Dirty Data
+library(lubridate) # Make Dealing with Dates a Little Easier
 
+#Vamos a trabajar con la información de la llegada de las vacunas Covid-19 a la Argentina
 wikipedia_url <- "https://es.wikipedia.org/wiki/Vacunaci%C3%B3n_contra_la_COVID-19_en_Argentina"
 
 vacunascovid_arg <- read_html(wikipedia_url)
@@ -36,14 +39,19 @@ tabla2 <- tabla2[[1]]
 
 #Nos quedamos con la fila que será nuestro header
 header <- as.vector(tabla2[2,],mode="character")
-class(header2)
+class(header)
 
 #Nos quedamos con la fila anterior por si no queremos perder esa info:
 info_header <- as.vector(tabla2[1,], mode="character")
 
-#Nos quedamos con la parte de la tabla que necesitamos y le cambiamos el nombre a las columnas por los correctos 
-tabla3 <- tabla2[3:78,1:5]%>%
-          `colnames<-`(header)
+
+ 
+tabla3 <- tabla2[3:78,1:5]%>% #Nos quedamos con la parte de la tabla que necesitamos
+          `colnames<-`(header)%>% #y le cambiamos el nombre a las columnas por los correctos
+          clean_names()%>% #Limpiamos los nombres de las columnas con janitor
+          mutate(fecha_de_llegada=dmy(tabla3$fecha_de_llegada))%>% #modificamos la columna de fechas a una con class=date
+          mutate(vacuna=as.factor(tabla3$vacuna))%>% #modificamos la columna vacuna y laboratorio por factores
+          mutate(laboratorio=as.factor(tabla3$laboratorio)) 
 tabla3
 
 
