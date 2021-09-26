@@ -47,34 +47,38 @@ info_header <- as.vector(tabla2[1,], mode="character")
 
 
  
-tabla3 <- tabla2[3:78,1:5]%>% #Nos quedamos con la parte de la tabla que necesitamos
-          `colnames<-`(header)%>% #y le cambiamos el nombre a las columnas por los correctos
-          clean_names() #Limpiamos los nombres de las columnas con janitor
+vacunas_covid <- tabla2[3:78,1:5]%>% #Nos quedamos con la parte de la tabla que necesitamos
+                 `colnames<-`(header)%>% #y le cambiamos el nombre a las columnas por los correctos
+                 clean_names() #Limpiamos los nombres de las columnas con janitor
 
-tabla3$fecha_de_llegada <- str_replace_all(tabla3$fecha_de_llegada, "de","")%>% #para pasar las fechas a inglés tal que el lubridate las reconozca vamos a primero sacar los "de"
-                           str_replace_all(c("enero" = "january",               #pasamos cada mes a su equivalente en inglés  
-                                             "febrero" = "february",
-                                             "marzo" ="march",
-                                             "abril"="april", 
-                                             "mayo"="may", 
-                                             "junio"="june", 
-                                             "julio"="july",
-                                             "agosto"="august",
-                                             "septiembre"="september",
-                                             "octubre" = "october",
-                                             "noviembre" ="november",
-                                             "diciembre" = "december"))
+vacunas_covid$fecha_de_llegada <- str_replace_all(vacunas_covid$fecha_de_llegada, "de","")%>% #para pasar las fechas a inglés tal que el lubridate las reconozca vamos a primero sacar los "de"
+                                  str_replace_all(c("enero" = "january",    #pasamos cada mes a su equivalente en inglés  
+                                                    "febrero" = "february",
+                                                    "marzo" ="march",
+                                                    "abril"="april", 
+                                                    "mayo"="may", 
+                                                    "junio"="june", 
+                                                    "julio"="july",
+                                                    "agosto"="august",
+                                                    "septiembre"="september",
+                                                    "octubre" = "october",
+                                                    "noviembre" ="november",
+                                                    "diciembre" = "december"))
 
 #Arreglamos la columna de cantidad de dosis para convertirla en números                        
-tabla3$cantidad_de_dosis <- gsub("[[:space:]]", "", tabla3$cantidad_de_dosis)%>%  #sacamos los espacios en blanco al interior de los números
-                            as.integer() #lo pasamos a integer
+vacunas_covid$cantidad_de_dosis <- gsub("[[:space:]]", "", tabla3$cantidad_de_dosis)%>%  #sacamos los espacios en blanco al interior de los números
+                                   as.integer() #lo pasamos a integer
 
-tabla3 <- tabla3 %>%
-          mutate(fecha_de_llegada=dmy(tabla3$fecha_de_llegada)) %>% #modificamos la columna de fechas a una con class=date
-          mutate(vacuna=as.factor(tabla3$vacuna)) %>% #modificamos la columna vacuna y laboratorio por factores
-          mutate(laboratorio=as.factor(tabla3$laboratorio))
+vacunas_covid <- vacunas_covid %>%
+                 mutate(fecha_de_llegada=dmy(vacunas_covid$fecha_de_llegada), #modificamos la columna de fechas a una con class=date
+                        vacuna=as.factor(vacunas_covid$vacuna), #modificamos la columna vacuna y laboratorio por factores
+                        laboratorio=as.factor(vacunas_covid$laboratorio))
+vacunas_covid
 
+#Agregamos las columnas mes y año para poder tener la información agregada por mes y por año
 
-tabla3
+vacunas_covid <- vacunas_covid %>%
+                 mutate(mes_llegada=month(vacunas_covid$fecha_de_llegada, label = TRUE, abbr = FALSE),
+                        año_llegada=year(vacunas_covid$fecha_de_llegada))
 
 
