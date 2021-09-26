@@ -64,9 +64,10 @@ tabla3$fecha_de_llegada <- str_replace_all(tabla3$fecha_de_llegada, "de","")%>% 
                                              "octubre" = "october",
                                              "noviembre" ="november",
                                              "diciembre" = "december"))
-                          
-tabla3$cantidad_de_dosis <- gsub("[[:space:]]", "", tabla3$cantidad_de_dosis)%>%
-                            as.integer()
+
+#Arreglamos la columna de cantidad de dosis para convertirla en números                        
+tabla3$cantidad_de_dosis <- gsub("[[:space:]]", "", tabla3$cantidad_de_dosis)%>%  #sacamos los espacios en blanco al interior de los números
+                            as.integer() #lo pasamos a integer
 
 tabla3 <- tabla3 %>%
           mutate(fecha_de_llegada=dmy(tabla3$fecha_de_llegada)) %>% #modificamos la columna de fechas a una con class=date
