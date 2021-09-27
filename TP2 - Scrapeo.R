@@ -10,6 +10,9 @@ library(janitor) # Simple Tools for Examining and Cleaning Dirty Data
 library(lubridate) # Make Dealing with Dates a Little Easier
 library(stringr)
 
+#cambiamos las opciones para no ver los números en notación científica
+options(scipen = 99, digits = 2)
+
 #Vamos a trabajar con la información de la llegada de las vacunas Covid-19 a la Argentina
 wikipedia_url <- "https://es.wikipedia.org/wiki/Vacunaci%C3%B3n_contra_la_COVID-19_en_Argentina"
 
@@ -79,6 +82,53 @@ vacunas_covid
 
 vacunas_covid <- vacunas_covid %>%
                  mutate(mes_llegada=month(vacunas_covid$fecha_de_llegada, label = TRUE, abbr = FALSE),
-                        año_llegada=year(vacunas_covid$fecha_de_llegada))
+                        mes_llegada_num=month(vacunas_covid$fecha_de_llegada),
+                        ano_llegada=year(vacunas_covid$fecha_de_llegada),
+                        ano_mes=paste(ano_llegada,"/",mes_llegada_num))
 
 
+#Ahora podemos ver las cantidades totales por labotatorio, por tipo de vacuna, por mes y año
+
+vacunas_covid_lab <- vacunas_covid %>%
+                     group_by(laboratorio) %>%
+                     summarise(cantidad=sum(cantidad_de_dosis))
+  
+vacunas_covid_mes <- vacunas_covid %>%
+                     group_by(ano_mes) %>%
+                     summarise(cantidad=sum(cantidad_de_dosis))%>%
+                     mutate(acumulado=cumsum(cantidad))
+
+
+vacunas_covid_mes_lab <- vacunas_covid %>%
+  group_by(ano_mes,laboratorio) %>%
+  summarise(cantidad=sum(cantidad_de_dosis))
+
+#Podemos ver rápidamente de qué laboratorios llegaron más vacunas
+ggplot(vacunas_covid_lab) +
+  geom_col(aes(reorder(laboratorio,cantidad),y=cantidad, fill=laboratorio))+
+  coord_flip()
+
+#Podemos ver qué cantidades llegaron por día por laboratorio
+ggplot(vacunas_covid) +
+  geom_line(aes(x=fecha_de_llegada,y=cantidad_de_dosis, color=laboratorio))+
+  geom_point(aes(x=fecha_de_llegada,y=cantidad_de_dosis, color=laboratorio))+
+  geom_text(aes(x=fecha_de_llegada,y=(cantidad_de_dosis+100000), label=cantidad_de_dosis, color=laboratorio), size=2)
+
+#También podemos revisar qué meses llegaron más vacunas
+ggplot(vacunas_covid_mes) +
+  geom_col(aes(x=ano_mes, y=cantidad, color=))+
+  coord_flip()
+
+#y a qué laboratorios correspondieron
+ggplot(vacunas_covid_mes_lab) +
+  geom_col(aes(x=ano_mes, y=cantidad, fill=laboratorio))+
+  coord_flip()
+
+
+ggplot(vacunas_covid_mes) +
+  geom_line(aes(x=ano_mes, y=acumulado))+
+  geom_col(aes(x=ano_mes, y=cantidad))
+
+
+  
+  
